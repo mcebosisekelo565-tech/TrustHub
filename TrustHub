@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TrustHub – Global Trust & Verification Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #f1f5f9; }
+        
+        /* Sidebar */
+        .sidebar { background: #0f172a; transition: transform 0.3s ease; }
+        .sidebar-item { transition: all 0.2s; cursor: pointer; }
+        .sidebar-item:hover { background: rgba(255,255,255,0.08); }
+        .sidebar-item.active { background: #4f46e5; color: white; }
+        
+        /* Cards & Stats */
+        .stat-card { transition: all 0.25s; background: white; }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.08); }
+        
+        /* Badges */
+        .badge { font-size: 0.65rem; padding: 0.2rem 0.7rem; border-radius: 9999px; font-weight: 600; }
+        .badge-high { background: #fee2e2; color: #dc2626; }
+        .badge-medium { background: #fef3c7; color: #d97706; }
+        .badge-low { background: #dbeafe; color: #2563eb; }
+        .badge-success { background: #d1fae5; color: #059669; }
+        .badge-warning { background: #fef3c7; color: #d97706; }
+        .badge-danger { background: #fee2e2; color: #dc2626; }
+        .badge-info { background: #dbeafe; color: #2563eb; }
+        .badge-purple { background: #e9d5ff; color: #7c3aed; }
+        
+        /* Trust Bar */
+        .trust-bar { height: 5px; border-radius: 9999px; background: #e2e8f0; overflow: hidden; }
+        .trust-fill { height: 100%; border-radius: 9999px; transition: width 0.8s ease; }
+        
+        /* Tabs */
+        .tab { cursor: pointer; transition: all 0.2s; padding-bottom: 0.5rem; }
+        .tab.active { border-bottom: 3px solid #4f46e5; color: #0f172a; font-weight: 600; }
+        .tab:not(.active) { color: #64748b; }
+        .tab:not(.active):hover { color: #0f172a; }
+        
+        /* Modals */
+        .modal-overlay { 
+            background: rgba(15, 23, 42, 0.6); 
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.2s ease;
+        }
+        .modal-content {
+            animation: slideUp 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        
+        /* Dropdown */
+        .dropdown-menu { animation: slideDown 0.2s ease; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Pulse for notifications */
+        @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .pulse-dot { animation: pulse-dot 1.5s ease-in-out infinite; }
+        
+        /* Form focus */
+        .form-input:focus { outline: none; border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        
+        /* Table row hover */
+        .table-row:hover { background: #f8fafc; }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================ -->
+    <!-- APP CONTAINER -->
+    <!-- ============================================================ -->
+    <div id="app" class="flex h-screen overflow-hidden">
+
+        <!-- ========================================================== -->
+        <!-- SIDEBAR -->
+        <!-- ========================================================== -->
+        <aside id="sidebar" class="sidebar w-64 flex-shrink-0 flex flex-col text-white shadow-2xl z-20">
+            <!-- Logo -->
+            <div class="p-6 border-b border-slate-700/60 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-500 flex items-center justify-center text-xl">
+                    <i class="fas fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">TrustHub</h1>
+                    <p class="text-[10px] text-slate-400 uppercase tracking-wider">Trust & Safety Console</p>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 p-4 space-y-0.5 overflow-y-auto">
+                <p class="text-[10px] uppercase text-slate-500 font-semibold tracking-wider mt-1 mb-3 px-3">Overview</p>
+                
+                <div class="sidebar-item active flex items-center gap-3 px-4 py-2.5 rounded-lg" data-tab="dashboard">
+                    <i class="fas fa-gauge-high w-5 text-center text-sm"></i>
+                    <span class="text-sm">Dashboard</span>
+                </div>
+                
+                <p class="text-[10px] uppercase text-slate-500 font-semibold tracking-wider mt-5 mb-3 px-3">Trust & Safety</p>
+                
+                <div class="sidebar-item flex items-center gap-3 px-4 py-2.5 rounded-lg" data-tab="flags">
+                    <i class="fas fa-flag w-5 text-center text-sm"></i>
+                    <span class="text-sm">Flags & Reports</span>
+                    <span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full pulse-dot">23</span>
+                </div>
+                
+                <div class="sidebar-item flex items-center gap-3 px-4 py-2.5 rounded-lg" data-tab="verifications">
+                    <i class="fas fa-file-circle-check w-5 text-center text-sm"></i>
+                    <span class="text-sm">Verification Queue</span>
+                    <span class="ml-auto bg-yellow-500 text-white text-[10px] px-2 py-0.5 rounded-full">147</span>
+                </div>
+                
+                <div class="sidebar-item flex items-center gap-3 px-4 py-2.5 rounded-lg" data-tab="investigations">
+                    <i class="fas fa-gavel w-5 text-center text-sm"></i>
+                    <span class="text-sm">Investigations</span>
+                </div>
+                
+                <p class="text-[10px] uppercase text-slate-500 font-semibold tracking-wider mt-5 mb-3 px-3">Users & Roles</p>
+                
+                <div class="sidebar-item flex items-center gap-3 px-4 py-2.5 rounded-lg" data-tab="users">
+                    <i class="fas fa-users w-5 text-center text-sm"></i>
+                    <span class="text-sm">All Users</span>
+                    <span class="ml-auto text-xs bg-slate-700 px-2 py-0.5 rounded-full">2,341</span>
+                </div>
+                
+                <div class="sidebar-item flex items-center gap-3 px-4 py-2.5 rounded-lg" data-tab="roles">
+                    <i class="fas fa-user-lock w-5 text-center text-sm"></i>
+                    <span class="text-sm">Role Management</span>
+                </div>
+                
+                <p class="text-[10px] uppercase text-slate-500 font-semibold tracking-wider mt-5 mb-3 px-3">Documents</p>
+                
+                <div class="sidebar-item flex items-center gap-3 px-4 py-2.5 rounded-lg" data-tab="documents">
+                    <i class="fas fa-folder-open w-5 text-center text-sm"></i>
+                    <span class="text-sm">Document Library</span>
+                </div>
+                
+                <p class="text-[10px] uppercase text-slate-500 font-semibold tracking-wider mt-5 mb-3 px-3">Billing</p>
+                
+                <div class="sidebar-item flex items-center gap-3 px-4 py-2.5 rounded-lg" data-tab="subscriptions">
+                    <i class="fas fa-credit-card w-5 text-center text-sm"></i>
+                    <span class="text-sm">Subscriptions</span>
+                </div>
+                
+                <div class="sidebar-item flex items-center gap-3 px-4 py-2.5 rounded-lg" data-tab="analytics">
+                    <i class="fas fa-chart-line w-5 text-center text-sm"></i>
+                    <span class="text-sm">Usage Analytics</span>
+                </div>
+            </nav>
+
+            <!-- Admin Profile -->
+            <div class="p-4 border-t border-slate-700/60 flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-indigo-500 flex items-center justify-center font-bold text-sm ring-2 ring-indigo-400/30">JD</div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium truncate">John Doe</p>
+                    <p class="text-[10px] text-slate-400">Super Admin</p>
+                </div>
+                <button id="logoutBtn" class="text-slate-400 hover:text-white transition text-sm">
+                    <i class="fas fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- ========================================================== -->
+        <!-- MAIN CONTENT -->
+        <!-- ========================================================== -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+
+            <!-- Top Bar -->
+            <header class="bg-white/80 backdrop-blur-sm shadow-sm px-8 py-3.5 flex items-center justify-between sticky top-0 z-10 border-b border-slate-100">
+                <div>
+                    <h2 id="pageTitle" class="text-lg font-semibold text-slate-800">Dashboard</h2>
+                    <p id="pageSubtitle" class="text-xs text-slate-500">Real-time overview of platform trust & safety</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button class="relative text-slate-500 hover:text-slate-700 transition text-lg">
+                        <i class="far fa-bell"></i>
+                        <span class="absolute -top-1 -right-1.5 bg-red-500 text-white text-[9px] rounded-full w-4 h-4 flex items-center justify-center pulse-dot">12</span>
+                    </button>
+                    <div class="relative">
+                        <input type="text" placeholder="Search users, documents..." class="form-input border border-slate-200 rounded-lg py-1.5 pl-9 pr-4 text-sm w-48 focus:w-64 transition-all duration-300" />
+                        <i class="fas fa-search absolute left-3 top-2 text-slate-400 text-sm"></i>
+                    </div>
+                    <button id="newReportBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-4 py-1.5 rounded-lg transition flex items-center gap-2">
+                        <i class="fas fa-plus"></i>
+                        <span class="hidden sm:inline">New Report</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Scrollable Content -->
+            <div class="flex-1 overflow-y-auto p-8">
+
+                <!-- ====================================================== -->
+                <!-- TAB: DASHBOARD -->
+                <!-- ====================================================== -->
+                <div id="tab-dashboard" class="tab-content">
+                    
+                    <!-- Stats -->
+                    <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 mb-8">
+                        <div class="stat-card p-5 rounded-xl shadow-sm border border-slate-100">
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-500 text-xs font-medium">Total Users</span>
+                                <i class="fas fa-users text-indigo-400 text-lg"></i>
+                            </div>
+                            <p class="text-2xl font-bold mt-1.5">2,341</p>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-[10px] text-green-600 bg-green-50 px-2 py-0.5 rounded-full"><i class="fas fa-arrow-up mr-0.5"></i> +18</span>
+                                <span class="text-[10px] text-slate-400">this week</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card p-5 rounded-xl shadow-sm border border-slate-100">
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-500 text-xs font-medium">Business Accounts</span>
+                                <i class="fas fa-building text-purple-400 text-lg"></i>
+                            </div>
+                            <p class="text-2xl font-bold mt-1.5">847</p>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-[10px] text-slate-400">Banks: 142</span>
+                                <span class="text-[10px] text-slate-400">• Insurers: 89</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card p-5 rounded-xl shadow-sm border border-slate-100">
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-500 text-xs font-medium">Citizens</span>
+                                <i class="fas fa-user text-emerald-400 text-lg"></i>
+                            </div>
+                            <p class="text-2xl font-bold mt-1.5">1,494</p>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-[10px] text-slate-400">With docs: 1,202</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card p-5 rounded-xl shadow-sm border border-slate-100">
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-500 text-xs font-medium">Active Subs</span>
+                                <i class="fas fa-credit-card text-amber-400 text-lg"></i>
+                            </div>
+                            <p class="text-2xl font-bold mt-1.5">612</p>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-[10px] text-slate-400">Monthly: 489</span>
+                                <span class="text-[10px] text-slate-400">• Yearly: 123</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card p-5 rounded-xl shadow-sm border border-slate-100">
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-500 text-xs font-medium">Docs Stored</span>
+                                <i class="fas fa-file text-rose-400 text-lg"></i>
+                            </div>
+                            <p class="text-2xl font-bold mt-1.5">8,432</p>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-[10px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full"><i class="fas fa-arrow-up mr-0.5"></i> +204</span>
+                                <span class="text-[10px] text-slate-400">today</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Trust & Safety Quick Stats -->
+                    <section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center text-red-600 text-xl"><i class="fas fa-flag"></i></div>
+                            <div>
+                                <p class="text-xs text-slate-500">Active Flags</p>
+                                <p class="text-xl font-bold text-slate-800">23</p>
+                                <span class="text-[10px] text-red-600">12 new today</span>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-yellow-100 flex items-center justify-center text-yellow-600 text-xl"><i class="fas fa-clock"></i></div>
+                            <div>
+                                <p class="text-xs text-slate-500">Pending Verification</p>
+                                <p class="text-xl font-bold text-slate-800">147</p>
+                                <span class="text-[10px] text-yellow-600">Needs source contact</span>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 text-xl"><i class="fas fa-check-circle"></i></div>
+                            <div>
+                                <p class="text-xs text-slate-500">Verified Docs</p>
+                                <p class="text-xl font-bold text-slate-800">6,842</p>
+                                <span class="text-[10px] text-emerald-600">81% of total</span>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600 text-xl"><i class="fas fa-ban"></i></div>
+                            <div>
+                                <p class="text-xs text-slate-500">Suspended Accounts</p>
+                                <p class="text-xl font-bold text-slate-800">18</p>
+                                <span class="text-[10px] text-rose-600">3 under investigation</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Trust Score Overview -->
+                    <section class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 mb-8">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-semibold text-slate-800"><i class="fas fa-star text-amber-500 mr-2"></i> Trust Score Overview</h3>
+                            <span class="text-sm text-slate-500">Platform Average: <strong class="text-slate-800">76%</strong></span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="font-medium">Sarah Mitchell</span>
+                                    <span class="text-emerald-600 font-bold">94%</span>
+                                </div>
+                                <div class="trust-bar"><div class="trust-fill bg-emerald-500" style="width:94%"></div></div>
+                                <span class="text-[10px] text-slate-400">5 verified docs • Citizen</span>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="font-medium">Alpha Bank</span>
+                                    <span class="text-emerald-600 font-bold">89%</span>
+                                </div>
+                                <div class="trust-bar"><div class="trust-fill bg-emerald-500" style="width:89%"></div></div>
+                                <span class="text-[10px] text-slate-400">Institution • 2,341 verifications</span>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="font-medium">NovaTech Ltd</span>
+                                    <span class="text-amber-600 font-bold">62%</span>
+                                </div>
+                                <div class="trust-bar"><div class="trust-fill bg-amber-500" style="width:62%"></div></div>
+                                <span class="text-[10px] text-slate-400">⚠️ Flagged for review</span>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="font-medium">user_anonymous_892</span>
+                                    <span class="text-red-600 font-bold">18%</span>
+                                </div>
+                                <div class="trust-bar"><div class="trust-fill bg-red-500" style="width:18%"></div></div>
+                                <span class="text-[10px] text-slate-400">🚫 Suspended account</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Recent Activity -->
+                    <section class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                            <h3 class="font-semibold text-slate-800"><i class="fas fa-clock-rotate-left text-indigo-500 mr-2"></i> Recent Activity</h3>
+                            <button class="text-sm text-indigo-600 hover:text-indigo-800 transition">View all →</button>
+                        </div>
+                        <div class="divide-y divide-slate-100">
+                            <div class="px-6 py-3 flex items-center gap-4">
+                                <span class="badge badge-success text-[10px]"><i class="fas fa-check mr-1"></i> Verified</span>
+                                <span class="text-sm text-slate-700">Passport verified for <strong>Alice Lee</strong></span>
+                                <span class="text-xs text-slate-400 ml-auto">2 min ago</span>
+                            </div>
+                            <div class="px-6 py-3 flex items-center gap-4">
+                                <span class="badge badge-danger text-[10px]"><i class="fas fa-flag mr-1"></i> Flagged</span>
+                                <span class="text-sm text-slate-700">Suspicious document reported for <strong>NovaTech Ltd</strong></span>
+                                <span class="text-xs text-slate-400 ml-auto">15 min ago</span>
+                            </div>
+                            <div class="px-6 py-3 flex items-center gap-4">
+                                <span class="badge badge-warning text-[10px]"><i class="fas fa-spinner mr-1"></i> Pending</span>
+                                <span class="text-sm text-slate-700">New verification request from <strong>SureSafe Insurance</strong></span>
+                                <span class="text-xs text-slate-400 ml-auto">1 hour ago</span>
+                            </div>
+                            <div class="px-6 py-3 flex items-center gap-4">
+                                <span class="badge badge-success text-[10px]"><i class="fas fa-user-plus mr-1"></i> New</span>
+                                <span class="text-sm text-slate-700">User <strong>Michael Chen</strong> registered as Citizen</span>
+                                <span class="text-xs text-slate-400 ml-auto">2 hours ago</span>
+                            </div>
+                            <div class="px-6 py-3 flex items-center gap-4">
+                                <span class="badge badge-purple text-[10px]"><i class="fas fa-credit-card mr-1"></i> Subscribed</span>
+                                <span class="text-sm text-slate-700"><strong>TechCorp HR</strong> upgraded to Yearly Enterprise</span>
+                                <span class="text-xs text-slate-400 ml-auto">3 hours ago</span>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- ====================================================== -->
+                <!-- TAB: FLAGS & REPORTS -->
+                <!-- ====================================================== -->
+                <div id="tab-flags" class="tab-content hidden">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between flex-wrap gap-2">
+                            <h3 class="font-semibold text-slate-800"><i class="fas fa-flag text-red-500 mr-2"></i> Active Flags & Reports</h3>
+                            <div class="flex gap-2">
+                                <button class="text-sm bg-slate-100 hover:bg-slate-200 px-3 py-1 rounded-lg transition">Filter</button>
+                                <button class="text-sm bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1 rounded-lg transition"><i class="fas fa-download mr-1"></i> Export</button>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wider">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left">Flagged Item</th>
+                                        <th class="px-6 py-3 text-left">Type</th>
+                                        <th class="px-6 py-3 text-left">Severity</th>
+                                        <th class="px-6 py-3 text-left">Reported By</th>
+                                        <th class="px-6 py-3 text-left">Date</th>
+                                        <th class="px-6 py-3 text-left">Status</th>
+                                        <th class="px-6 py-3 text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    <tr class="table-row">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600"><i class="fas fa-file-pdf"></i></div>
+                                                <div>
+                                                    <p class="font-medium text-slate-800">Passport #A12345678</p>
+                                                    <p class="text-xs text-slate-400">John Smith • Citizen</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge badge-danger">Suspicious Doc</span></td>
+                                        <td><span class="badge badge-high"><i class="fas fa-circle text-[6px] align-middle mr-1"></i> High</span></td>
+                                        <td>
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-xs">Alpha Bank</span>
+                                                <span class="text-[10px] text-slate-400">(KYC team)</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-slate-500">2 hours ago</td>
+                                        <td><span class="badge badge-warning"><i class="fas fa-spinner fa-spin mr-1"></i> Investigating</span></td>
+                                        <td class="text-center">
+                                            <button class="view-flag-btn text-indigo-600 hover:text-indigo-800 text-xs font-medium"><i class="fas fa-eye"></i> View</button>
+                                            <button class="text-emerald-600 hover:text-emerald-800 text-xs ml-2"><i class="fas fa-check"></i> Resolve</button>
+                                        </td>
+                                    </tr>
+                                    <tr class="table-row">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600"><i class="fas fa-building"></i></div>
+                                                <div>
+                                                    <p class="font-medium text-slate-800">NovaTech Ltd</p>
+                                                    <p class="text-xs text-slate-400">KYB • Business</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge badge-warning">False Info</span></td>
+                                        <td><span class="badge badge-medium"><i class="fas fa-circle text-[6px] align-middle mr-1"></i> Medium</span></td>
+                                        <td>
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-xs">SureSafe Insurance</span>
+                                                <span class="text-[10px] text-slate-400">(Compliance)</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-slate-500">5 hours ago</td>
+                                        <td><span class="badge badge-danger"><i class="fas fa-exclamation-triangle mr-1"></i> Needs Review</span></td>
+                                        <td class="text-center">
+                                            <button class="view-flag-btn text-indigo-600 hover:text-indigo-800 text-xs font-medium"><i class="fas fa-eye"></i> View</button>
+                                            <button class="text-rose-600 hover:text-rose-800 text-xs ml-2"><i class="fas fa-ban"></i> Suspend</button>
+                                        </td>
+                                    </tr>
+                                    <tr class="table-row">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600"><i class="fas fa-graduation-cap"></i></div>
+                                                <div>
+                                                    <p class="font-medium text-slate-800">Diploma #MIT-2024</p>
+                                                    <p class="text-xs text-slate-400">Sarah Lee • Citizen</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge badge-purple">Fake Credential</span></td>
+                                        <td><span class="badge badge-high"><i class="fas fa-circle text-[6px] align-middle mr-1"></i> High</span></td>
+                                        <td>
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-xs">TechCorp HR</span>
+                                                <span class="text-[10px] text-slate-400">(Background Check)</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-slate-500">1 day ago</td>
+                                        <td><span class="badge badge-info"><i class="fas fa-phone mr-1"></i> Contacting MIT</span></td>
+                                        <td class="text-center">
+                                            <button class="view-flag-btn text-indigo-600 hover:text-indigo-800 text-xs font-medium"><i class="fas fa-eye"></i> View</button>
+                                            <button class="text-emerald-600 hover:text-emerald-800 text-xs ml-2"><i class="fas fa-check"></i> Resolve</button>
+                                        </td>
+                                    </tr>
+                                    <tr class="table-row">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center text-rose-600"><i class="fas fa-user-slash"></i></div>
+                                                <div>
+                                                    <p class="font-medium text-slate-800">user_anonymous_892</p>
+                                                    <p class="text-xs text-slate-400">Citizen • Multiple flags</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge badge-danger">Suspicious Account</span></td>
+                                        <td><span class="badge badge-high"><i class="fas fa-circle text-[6px] align-middle mr-1"></i> High</span></td>
+                                        <td>
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-xs">System Auto-Flag</span>
+                                                <span class="text-[10px] text-slate-400">(AI detection)</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-slate-500">3 days ago</td>
+                                        <td><span class="badge badge-danger"><i class="fas fa-lock mr-1"></i> Suspended</span></td>
+                                        <td class="text-center">
+                                            <button class="view-flag-btn text-indigo-600 hover:text-indigo-800 text-xs font-medium"><i class="fas fa-eye"></i> View</button>
+                                            <button class="text-emerald-600 hover:text-emerald-800 text-xs ml-2"><i class="fas fa-unlock"></i> Reinstate</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Quick Report Form -->
+                    <div class="mt-6 bg-white rounded-xl shadow-sm border border-slate-100 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="font-semibold text-slate-800"><i class="fas fa-flag text-red-500 mr-2"></i> Report False Information</h4>
+                            <span class="text-xs text-slate-400">Anyone can report suspicious accounts or documents</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                            <select class="form-input border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white">
+                                <option value="">Report type</option>
+                                <option>Fake Document</option>
+                                <option>False Identity</option>
+                                <option>Fake Business</option>
+                                <option>Misinformation</option>
+                                <option>Fraudulent Activity</option>
+                            </select>
+                            <input type="text" placeholder="User ID, document ID, or name" class="form-input border border-slate-200 rounded-lg px-3 py-2 text-sm" />
+                            <input type="text" placeholder="Your email (for follow-up)" class="form-input border border-slate-200 rounded-lg px-3 py-2 text-sm" />
+                            <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition text-sm flex items-center justify-center gap-2">
+                                <i class="fas fa-paper-plane"></i> Submit Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ====================================================== -->
+                <!-- TAB: VERIFICATIONS -->
+                <!-- ====================================================== -->
+                <div id="tab-verifications" class="tab-content hidden">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-semibold text-slate-800"><i class="fas fa-file-circle-check text-yellow-500 mr-2"></i> Document Verification Queue</h3>
+                            <span class="text-sm bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full">147 pending</span>
+                        </div>
+                        <div class="space-y-4">
+                            <!-- Verification Item 1 -->
+                            <div class="border border-slate-200 rounded-lg p-4 hover:border-indigo-300 transition">
+                                <div class="flex items-start justify-between flex-wrap gap-3">
+                                    <div class="flex gap-3">
+                                        <div class="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600"><i class="fas fa-passport"></i></div>
+                                        <div>
+                                            <p class="font-medium text-sm">Passport – Alice Lee</p>
+                                            <p class="text-xs text-slate-500">Source: UK Passport Office</p>
+                                            <div class="flex items-center gap-2 mt-1 flex-wrap">
+                                                <span class="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full"><i class="fas fa-clock mr-1"></i> Contacting source</span>
+                                                <span class="text-[10px] text-slate-400">Submitted: 3 hours ago</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2 flex-wrap">
+                                        <button class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg transition"><i class="fas fa-phone mr-1"></i> Contact</button>
+                                        <button class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg transition"><i class="fas fa-check mr-1"></i> Verify</button>
+                                        <button class="text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg transition"><i class="fas fa-times mr-1"></i> Reject</button>
+                                    </div>
+                                </div>
+                                <div class="mt-2 text-xs text-slate-400 bg-slate-50 p-2 rounded-lg">
+                                    <i class="fas fa-info-circle mr-1"></i> Source contacted: 2 hours ago • Awaiting response
+                                </div>
+                            </div>
+
+                            <!-- Verification Item 2 -->
+                            <div class="border border-slate-200 rounded-lg p-4 hover:border-indigo-300 transition">
+                                <div class="flex items-start justify-between flex-wrap gap-3">
+                                    <div class="flex gap-3">
+                                        <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600"><i class="fas fa-building"></i></div>
+                                        <div>
+                                            <p class="font-medium text-sm">Company Registration – NovaTech Ltd</p>
+                                            <p class="text-xs text-slate-500">Source: Companies House</p>
+                                            <div class="flex items-center gap-2 mt-1 flex-wrap">
+                                                <span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full"><i class="fas fa-check-circle mr-1"></i> Verified</span>
+                                                <span class="text-[10px] text-slate-400">Completed: 1 hour ago</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button class="text-xs bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg cursor-not-allowed" disabled><i class="fas fa-check mr-1"></i> Completed</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Verification Item 3 -->
+                            <div class="border border-slate-200 rounded-lg p-4 hover:border-indigo-300 transition">
+                                <div class="flex items-start justify-between flex-wrap gap-3">
+                                    <div class="flex gap-3">
+                                        <div class="w-10 h-10 rounded-lg bg-cyan-100 flex items-center justify-center text-cyan-600"><i class="fas fa-graduation-cap"></i></div>
+                                        <div>
+                                            <p class="font-medium text-sm">Diploma – Michael Chen</p>
+                                            <p class="text-xs text-slate-500">Source: MIT Registrar</p>
+                                            <div class="flex items-center gap-2 mt-1 flex-wrap">
+                                                <span class="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full"><i class="fas fa-exclamation-triangle mr-1"></i> Flagged as fake</span>
+                                                <span class="text-[10px] text-slate-400">Submitted: 5 hours ago</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2 flex-wrap">
+                                        <button class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg transition"><i class="fas fa-phone mr-1"></i> Contact</button>
+                                        <button class="text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg transition"><i class="fas fa-times mr-1"></i> Reject</button>
+                                    </div>
+                                </div>
+                                <div class="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded-lg">
+                                    <i class="fas fa-flag mr-1"></i> Flagged by TechCorp HR • Evidence: mismatched font and seal
+                                </div>
+                            </div>
+
+                            <!-- Verification Item 4 -->
+                            <div class="border border-slate-200 rounded-lg p-4 hover:border-indigo-300 transition">
+                                <div class="flex items-start justify-between flex-wrap gap-3">
+                                    <div class="flex gap-3">
+                                        <div class="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center text-amber-600"><i class="fas fa-id-card"></i></div>
+                                        <div>
+                                            <p class="font-medium text-sm">Driver Licence – David Kim</p>
+                                            <p class="text-xs text-slate-500">Source: DMV California</p>
+                                            <div class="flex items-center gap-2 mt-1 flex-wrap">
+                                                <span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full"><i class="fas fa-spinner fa-spin mr-1"></i> In Progress</span>
+                                                <span class="text-[10px] text-slate-400">Submitted: 1 day ago</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2 flex-wrap">
+                                        <button class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg transition"><i class="fas fa-phone mr-1"></i> Contact</button>
+                                        <button class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg transition"><i class="fas fa-check mr-1"></i> Verify</button>
+                                    </div>
+                                </div>
+                                <div class="mt-2 text-xs text-slate-400 bg-slate-50 p-2 rounded-lg">
+                                    <i class="fas fa-clock mr-1"></i> Waiting for DMV response • 2 follow-ups sent
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ====================================================== -->
+                <!-- TAB: USERS (placeholder) -->
+                <!-- ====================================================== -->
+                <div id="tab-users" class="tab-content hidden">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-8 text-center">
+                        <i class="fas fa-users text-4xl text-slate-300 mb-3"></i>
+                        <h3 class="text-lg font-semibold text-slate-700">User Management</h3>
+                        <p class="text-slate-500 text-sm">View and manage all 2,341 users across the platform.</p>
+                        <button class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition text-sm">
+                            <i class="fas fa-user-plus mr-2"></i> Add New User
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ====================================================== -->
+                <!-- TAB: ROLES (placeholder) -->
+                <!-- ====================================================== -->
+                <div id="tab-roles" class="tab-content hidden">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-8 text-center">
+                        <i class="fas fa-user-lock text-4xl text-slate-300 mb-3"></i>
+                        <h3 class="text-lg font-semibold text-slate-700">Role Management</h3>
+                        <p class="text-slate-500 text-sm">Define custom roles and permissions for all user types.</p>
+                    </div>
+                </div>
+
+                <!-- ====================================================== -->
+                <!-- TAB: DOCUMENTS (placeholder) -->
+                <!-- ====================================================== -->
+                <div id="tab-documents" class="tab-content hidden">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-8 text-center">
+                        <i class="fas fa-folder-open text-4xl text-slate-300 mb-3"></i>
+                        <h3 class="text-lg font-semibold text-slate-700">Document Library</h3>
+                        <p class="text-slate-500 text-sm">Manage 8,432 documents across all users and institutions.</p>
+                    </div>
+                </div>
+
+                <!-- ====================================================== -->
+                <!-- TAB: SUBSCRIPTIONS (placeholder) -->
+                <!-- ====================================================== -->
+                <div id="tab-subscriptions" class="tab-content hidden">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-8 text-center">
+                        <i class="fas fa-credit-card text-4xl text-slate-300 mb-3"></i>
+                        <h3 class="text-lg font-semibold text-slate-700">Subscription Management</h3>
+                        <p class="text-slate-500 text-sm">Manage 612 active subscriptions across all plans.</p>
+                    </div>
+                </div>
+
+                <!-- ====================================================== -->
+                <!-- TAB: ANALYTICS (placeholder) -->
+                <!-- ====================================================== -->
+                <div id="tab-analytics" class="tab-content hidden">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-8 text-center">
+                        <i class="fas fa-chart-line text-4xl text-slate-300 mb-3"></i>
+                        <h3 class="text-lg font-semibold text-slate-700">Usage Analytics</h3>
+                        <p class="text-slate-500 text-sm">Platform usage metrics and API call analytics.</p>
+                    </div>
+                </div>
+
+                <!-- ====================================================== -->
+                <!-- TAB: INVESTIGATIONS (placeholder) -->
+                <!-- ====================================================== -->
+                <div id="tab-investigations" class="tab-content hidden">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-8 text-center">
+                        <i class="fas fa-gavel text-4xl text-slate-300 mb-3"></i>
+                        <h3 class="text-lg font-semibold text-slate-700">Investigations</h3>
+                        <p class="text-slate-500 text-sm">Active investigations and case management.</p>
+                    </div>
+                </div>
+
+                <!-- Footer spacing -->
+                <div class="h-8"></div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- MODAL: Flag Detail View -->
+    <!-- ============================================================ -->
+    <div id="flagModal" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50">
+        <div class="modal-content bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-slate-800"><i class="fas fa-flag text-red-500 mr-2"></i> Flag Details</h3>
+                <button onclick="closeModal('flagModal')" class="text-slate-400 hover:text-slate-600 transition text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div><span class="text-sm text-slate-500">Flagged Item:</span><p class="font-medium">Passport #A12345678</p></div>
+                    <div><span class="text-sm text-slate-500">Severity:</span><p class="font-medium text-red-600">⚠️ High</p></div>
+                    <div><span class="text-sm text-slate-500">Reported By:</span><p class="font-medium">Alpha Bank (KYC Team)</p></div>
+                    <div><span class="text-sm text-slate-500">Date:</span><p class="font-medium">2 hours ago</p></div>
+                </div>
+                <div>
+                    <span class="text-sm text-slate-500">Reason:</span>
+                    <p class="text-sm bg-slate-50 p-3 rounded-lg mt-1">Document shows signs of digital manipulation. UV light features appear inconsistent with standard passport format. The holographic seal appears to be a reproduction.</p>
+                </div>
+                <div>
+                    <span class="text-sm text-slate-500">Investigation Notes:</span>
+                    <textarea class="w-full border border-slate-200 rounded-lg p-2 text-sm form-input" rows="3" placeholder="Add investigation notes..."></textarea>
+                </div>
+                <div class="flex flex-wrap gap-3 pt-3 border-t border-slate-200">
+                    <button class="flex-1 min-w-[100px] bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg transition"><i class="fas fa-check mr-2"></i> Dismiss</button>
+                    <button class="flex-1 min-w-[100px] bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition"><i class="fas fa-ban mr-2"></i> Suspend</button>
+                    <button onclick="closeModal('flagModal')" class="flex-1 min-w-[100px] bg-slate-200 hover:bg-slate-300 text-slate-700 py-2 rounded-lg transition">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- MODAL: New Report -->
+    <!-- ============================================================ -->
+    <div id="reportModal" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50">
+        <div class="modal-content bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-slate-800"><i class="fas fa-flag text-red-500 mr-2"></i> New Report</h3>
+                <button onclick="closeModal('reportModal')" class="text-slate-400 hover:text-slate-600 transition text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Report Type *</label>
+                    <select class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm form-input bg-white">
+                        <option>Select type...</option>
+                        <option>Fake Document</option>
+                        <option>False Identity</option>
+                        <option>Fake Business</option>
+                        <option>Misinformation</option>
+                        <option>Fraudulent Activity</option>
+                        <option>Suspicious Account</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">User or Document ID *</label>
+                    <input type="text" placeholder="e.g., user_123 or doc_456" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm form-input" required />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Your Email *</label>
+                    <input type="email" placeholder="you@email.com" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm form-input" required />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Description *</label>
+                    <textarea rows="4" placeholder="Please describe the issue in detail..." class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm form-input" required></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Evidence (optional)</label>
+                    <input type="file" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm form-input bg-white" />
+                </div>
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-lg transition font-medium">
+                    <i class="fas fa-paper-plane mr-2"></i> Submit Report
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- MODAL: Login/Signup (Demo) -->
+    <!-- ============================================================ -->
+    <div id="loginModal" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50">
+        <div class="modal-content bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl mx-4">
+            <div class="text-center mb-6">
+                <div class="w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center text-white text-2xl mx-auto mb-3">
+                    <i class="fas fa-shield-halved"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800">Welcome to TrustHub</h2>
+                <p class="text-sm text-slate-500 mt-1">Sign in to manage trust & verification</p>
+            </div>
+            <form class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                    <input type="email" value="admin@trusthub.com" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm form-input" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                    <input type="password" value="password123" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm form-input" />
+                </div>
+                <div class="flex items-center justify-between text-sm">
+                    <label class="flex items-center gap-2 text-slate-600">
+                        <input type="checkbox" checked class="rounded border-slate-300" /> Remember me
+                    </label>
+                    <a href="#" class="text-indigo-600 hover:text-indigo-800 transition">Forgot password?</a>
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg transition font-medium">
+                    <i class="fas fa-sign-in-alt mr-2"></i> Sign In
+                </button>
+            </form>
+            <p class="text-center text-sm text-slate-500 mt-4">
+                Don't have an account? <a href="#" class="text-indigo-600 hover:text-indigo-800 font-medium">Sign up</a>
+            </p>
+            <div class="mt-6 pt-6 border-t border-slate-200">
+                <p class="text-xs text-slate-400 text-center">Demo credentials: admin@trusthub.com / password123</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT -->
+    <!-- ============================================================ -->
+    <script>
+        // =============================================================
+        // TAB NAVIGATION
+        // =============================================================
+        const sidebarItems = document.querySelectorAll('.sidebar-item');
+        const tabContents = {
+            dashboard: document.getElementById('tab-dashboard'),
+            flags: document.getElementById('tab-flags'),
+            verifications: document.getElementById('tab-verifications'),
+            investigations: document.getElementById('tab-investigations'),
+            users: document.getElementById('tab-users'),
+            roles: document.getElementById('tab-roles'),
+            documents: document.getElementById('tab-documents'),
+            subscriptions: document.getElementById('tab-subscriptions'),
+            analytics: document.getElementById('tab-analytics')
+        };
+
+        const pageTitles = {
+            dashboard: ['Dashboard', 'Real-time overview of platform trust & safety'],
+            flags: ['Flags & Reports', 'Manage all active flags and reports'],
+            verifications: ['Verification Queue', 'Manually verify documents by contacting sources'],
+            investigations: ['Investigations', 'Active case management'],
+            users: ['All Users', 'Manage 2,341 users across the platform'],
+            roles: ['Role Management', 'Define custom roles and permissions'],
+            documents: ['Document Library', 'Manage 8,432 documents'],
+            subscriptions: ['Subscriptions', 'Manage 612 active subscriptions'],
+            analytics: ['Usage Analytics', 'Platform usage and API metrics']
+        };
+
+        function switchTab(tabId) {
+            // Update sidebar
+            sidebarItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.tab === tabId) {
+                    item.classList.add('active');
+                }
+            });
+
+            // Update content
+            Object.keys(tabContents).forEach(key => {
+                tabContents[key].classList.add('hidden');
+            });
+            if (tabContents[tabId]) {
+                tabContents[tabId].classList.remove('hidden');
+            }
+
+            // Update title
+            const title = pageTitles[tabId] || ['Page', ''];
+            document.getElementById('pageTitle').textContent = title[0];
+            document.getElementById('pageSubtitle').textContent = title[1];
+        }
+
+        sidebarItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const tab = item.dataset.tab;
+                if (tab) switchTab(tab);
+            });
+        });
+
+        // =============================================================
+        // MODAL CONTROLS
+        // =============================================================
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+            document.getElementById(id).style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+            document.getElementById(id).style.display = 'none';
+        }
+
+        // Close modals on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.classList.add('hidden');
+                    overlay.style.display = 'none';
+                }
+            });
+        });
+
+        // View flag buttons
+        document.querySelectorAll('.view-flag-btn').forEach(btn => {
+            btn.addEventListener('click', () => openModal('flagModal'));
+        });
+
+        // New report button
+        document.getElementById('newReportBtn').addEventListener('click', () => openModal('reportModal'));
+
+        // =============================================================
+        // LOGOUT
+        // =============================================================
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            if (confirm('Are you sure you want to logout?')) {
+                openModal('loginModal');
+            }
+        });
+
+        // =============================================================
+        // SHOW LOGIN ON LOAD (if not logged in)
+        // =============================================================
+        // Uncomment to show login modal on load
+        // setTimeout(() => openModal('loginModal'), 500);
+
+        // =============================================================
+        // DEMO: Login form submission
+        // =============================================================
+        document.querySelector('#loginModal form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            closeModal('loginModal');
+            // Show success toast (optional)
+        });
+
+        // =============================================================
+        // DEMO: Report form submission
+        // =============================================================
+        document.querySelector('#reportModal form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('✅ Report submitted successfully! Our team will review it within 24 hours.');
+            closeModal('reportModal');
+        });
+
+        // =============================================================
+        // SEARCH (demo)
+        // =============================================================
+        document.querySelector('input[placeholder*="Search"]').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                alert('🔍 Searching for: ' + e.target.value);
+            }
+        });
+
+        console.log('🚀 TrustHub Admin Console loaded successfully!');
+        console.log('📌 Features: Dashboard | Flags | Verifications | Users | Roles | Documents | Subscriptions | Analytics');
+        console.log('💡 Click "New Report" or "View" on any flag to see modals in action.');
+    </script>
+
+</body>
+</html>
